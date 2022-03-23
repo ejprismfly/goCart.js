@@ -96,6 +96,10 @@ class GoCart {
             this.setDrawerDirection();
         }
 
+        document.addEventListener('refresh:drawer', (event) => {
+            this.fetchCart();
+        }, false);
+
         document.addEventListener('click', (event) => {
             if (event.target.matches(this.defaults.addToCart)) {
                 event.preventDefault();
