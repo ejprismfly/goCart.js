@@ -374,9 +374,10 @@ class GoCart {
             }
             let vcontent = item.info ? item.info : itemVariant;
             let dline = item.line_id ? item.line_id : Number(index + 1);
+            let dstack = item.properties.hasOwnProperty('_stack_parent') ? Boolean(item.properties._stack_parent)  : false;
 
             const cartSingleProduct = `
-        <div class="go-cart-item__single ${isHidden ? 'hide' : ''}" data-line="${dline}">
+        <div class="go-cart-item__single ${isHidden ? 'hide' : ''}" data-line="${dline}" data-is-stack="${dstack}">
             <div class="go-cart-item__info-wrapper">
                 <div class="go-cart-item__image" style="background-image: url(${item.image});"></div>
                 <div class="go-cart-item__info">
