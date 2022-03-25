@@ -413,7 +413,7 @@ class GoCart {
                 const is_stack = item.parentNode.getAttribute('data-stack');
                 let extra = null;
                 if (is_stack && typeof this.stackBeforeDeleteCallback === 'function') {
-                    extra = this.stackBeforeDeleteCallback(line);
+                    extra = this.stackBeforeDeleteCallback(cart, line);
                 }
                 this.removeItem(line, extra);
             });
