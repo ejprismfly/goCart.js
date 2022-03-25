@@ -233,12 +233,12 @@ class GoCart {
         const quantity = 0;
 
         let citem = cart.items[line - 1];
-
         let params = {};
-        params[citem.key] = quantity;
         if (extra) {
             params = extra;
         }
+        params[citem.key] = quantity;
+
         window.fetch('/cart/update.js', {
             method: 'POST',
             credentials: 'same-origin',
