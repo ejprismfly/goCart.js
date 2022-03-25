@@ -310,6 +310,9 @@ class GoCart {
                 this.renderBlankCartDrawer();
                 this.cartDrawerFooter.classList.add('is-invisible');
                 this.cartDrawerFooterMessage.classList.add('is-invisible');
+                document.dispatchEvent(new CustomEvent("drawerRender", {
+                    detail: { cart }
+                }));
             } else {
                 this.renderDrawerCart(cart);
                 this.cartDrawerFooter.classList.remove('is-invisible');
