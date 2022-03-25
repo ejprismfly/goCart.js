@@ -373,8 +373,10 @@ class GoCart {
                 itemVariant = '';
             }
             let vcontent = item.info ? item.info : itemVariant;
+            let dline = item.line_id ? item.line_id : Number(index + 1);
+
             const cartSingleProduct = `
-        <div class="go-cart-item__single ${isHidden ? 'hide' : ''}" data-line="${Number(index + 1)}">
+        <div class="go-cart-item__single ${isHidden ? 'hide' : ''}" data-line="${dline}">
             <div class="go-cart-item__info-wrapper">
                 <div class="go-cart-item__image" style="background-image: url(${item.image});"></div>
                 <div class="go-cart-item__info">
