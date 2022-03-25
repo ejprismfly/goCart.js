@@ -41,7 +41,8 @@ class GoCart {
             labelCartIsEmpty: 'Your Cart is currently empty!',
             labelQuantity: 'Quantity:',
             labelRemove: 'Remove',
-            cartFormatterCallback: null
+            cartFormatterCallback: null,
+            stackBeforeDeleteCallback: null
         };
 
         this.defaults = Object.assign({}, defaults, options);
@@ -79,6 +80,7 @@ class GoCart {
         this.labelQuantity = this.defaults.labelQuantity;
         this.labelRemove = this.defaults.labelRemove;
         this.cartFormatterCallback = this.defaults.cartFormatterCallback;
+        this.stackBeforeDeleteCallback = this.defaults.stackBeforeDeleteCallback;
 
         this.init();
 
@@ -227,12 +229,16 @@ class GoCart {
             });
     }
 
-    removeItem(line) {
+    removeItem(line, extra) {
         const quantity = 0;
+        let params = JSON.stringify({quantity, line});
+        if (extra) {
+            params = JSON.stringify(extra);
+        }
         window.fetch('/cart/change.js', {
             method: 'POST',
             credentials: 'same-origin',
-            body: JSON.stringify({quantity, line}),
+            body: params,
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -377,7 +383,7 @@ class GoCart {
             let dstack = item.properties.hasOwnProperty('_stack_parent') ? Boolean(item.properties._stack_parent)  : false;
 
             const cartSingleProduct = `
-        <div class="go-cart-item__single ${isHidden ? 'hide' : ''}" data-line="${dline}" data-is-stack="${dstack}">
+        <div class="go-cart-item__single ${isHidden ? 'hide' : ''}" data-line="${dline}" ${dstack ? `data-stack="1"` : ''}>
             <div class="go-cart-item__info-wrapper">
                 <div class="go-cart-item__image" style="background-image: url(${item.image});"></div>
                 <div class="go-cart-item__info">
@@ -404,7 +410,12 @@ class GoCart {
             item.addEventListener('click', () => {
                 GoCart.removeItemAnimation(item.parentNode);
                 const line = item.parentNode.getAttribute('data-line');
-                this.removeItem(line);
+                const is_stack = item.parentNode.getAttribute('data-stack');
+                let extra = null;
+                if (is_stack && typeof this.stackBeforeDeleteCallback === 'function') {
+                    extra = this.stackBeforeDeleteCallback(line);
+                }
+                this.removeItem(line, extra);
             });
         });
         const itemQuantityPlus = document.querySelectorAll(this.itemQuantityPlus);
