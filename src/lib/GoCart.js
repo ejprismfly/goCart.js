@@ -231,14 +231,15 @@ class GoCart {
 
     removeItem(line, extra) {
         const quantity = 0;
-        let params = JSON.stringify({quantity, line});
+        let params = {};
+        params[line] = quantity;
         if (extra) {
-            params = JSON.stringify(extra);
+            params = extra;
         }
-        window.fetch('/cart/change.js', {
+        window.fetch('/cart/update.js', {
             method: 'POST',
             credentials: 'same-origin',
-            body: params,
+            body: JSON.stringify({ updates: params }),
             headers: {
                 'Content-Type': 'application/json',
             },
