@@ -100,6 +100,18 @@ class GoCart {
             this.fetchCart();
         }, false);
 
+        document.addEventListener('fetch:drawer', (event) => {
+            this.fetchAndOpenCart();
+        }, false);
+
+        document.addEventListener('open:drawer', (event) => {
+            this.openCartDrawer();
+        }, false);
+
+        document.addEventListener('close:drawer', (event) => {
+            this.closeCartDrawer();
+        }, false);
+
         document.addEventListener('click', (event) => {
             if (event.target.matches(this.defaults.addToCart)) {
                 event.preventDefault();
