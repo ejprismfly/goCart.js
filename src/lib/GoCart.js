@@ -229,10 +229,13 @@ class GoCart {
             });
     }
 
-    removeItem(line, extra) {
+    removeItem(line, extra, cart) {
         const quantity = 0;
+
+        let citem = cart.items[line - 1];
+
         let params = {};
-        params[line] = quantity;
+        params[citem.key] = quantity;
         if (extra) {
             params = extra;
         }
@@ -416,7 +419,7 @@ class GoCart {
                 if (is_stack && typeof this.stackBeforeDeleteCallback === 'function') {
                     extra = this.stackBeforeDeleteCallback(cart, line);
                 }
-                this.removeItem(line, extra);
+                this.removeItem(line, extra, cart);
             });
         });
         const itemQuantityPlus = document.querySelectorAll(this.itemQuantityPlus);
@@ -478,7 +481,7 @@ class GoCart {
             item.addEventListener('click', () => {
                 GoCart.removeItemAnimation(item.parentNode);
                 const line = item.parentNode.getAttribute('data-line');
-                this.removeItem(line);
+                this.removeItem(line, null, cart);
             });
         });
         const itemQuantityPlus = document.querySelectorAll(this.itemQuantityPlus);
