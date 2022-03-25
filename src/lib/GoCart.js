@@ -434,7 +434,17 @@ class GoCart {
         itemQuantityMinus.forEach((item) => {
             item.addEventListener('click', () => {
                 const line = item.parentNode.parentNode.getAttribute('data-line');
+                const is_stack = item.parentNode.parentNode.getAttribute('data-stack');
                 const quantity = Number(item.parentNode.querySelector(this.itemQuantity).value) - 1;
+
+                if (quantity === 0 && is_stack && typeof this.stackBeforeDeleteCallback === 'function') {
+                    let extra = null;
+                    GoCart.removeItemAnimation(item.parentNode.parentNode);
+                    extra = this.stackBeforeDeleteCallback(cart, line);
+                    this.removeItem(line, extra, cart);
+                    return;
+                }
+
                 this.changeItemQuantity(line, quantity);
                 if (Number((item.parentNode.querySelector(this.itemQuantity).value - 1)) === 0) {
                     GoCart.removeItemAnimation(item.parentNode.parentNode);
