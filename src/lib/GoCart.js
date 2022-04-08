@@ -265,7 +265,7 @@ class GoCart {
         window.fetch('/cart/change.js', {
             method: 'POST',
             credentials: 'same-origin',
-            body: JSON.stringify({quantity, line}),
+            body: JSON.stringify({quantity: Number(quantity), line: Number(line)}),
             headers: {
                 'Content-Type': 'application/json',
             },
