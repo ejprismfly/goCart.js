@@ -261,11 +261,15 @@ class GoCart {
             });
     }
 
-    changeItemQuantity(line, quantity) {
+    changeItemQuantity(line, quantity, properties) {
+        let params = {quantity: Number(quantity), line: Number(line)};
+        if (properties) {
+          params.properties = properties;
+        }
         window.fetch('/cart/change.js', {
             method: 'POST',
             credentials: 'same-origin',
-            body: JSON.stringify({quantity: Number(quantity), line: Number(line)}),
+            body: JSON.stringify(params),
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -315,6 +319,7 @@ class GoCart {
             cart = cartResponse;
         }
         this.cartItemCount(cart);
+        this.cartDrawerSubTotal.innerHTML = formatMoney(cart.total_price, this.moneyFormat);
         if (this.isDrawerMode) {
             if (cart.item_count === 0) {
                 this.renderBlankCartDrawer();
@@ -384,10 +389,10 @@ class GoCart {
             }
             let vcontent = item.info ? item.info : itemVariant;
             let dline = item.line_id ? Number(item.line_id) + 1 : Number(index + 1);
-            let dstack = item.properties.hasOwnProperty('_stack_parent') ? Boolean(item.properties._stack_parent)  : false;
-
+            let dstack = item.properties.hasOwnProperty('_stack_parent') ? Boolean(item.properties._stack_parent) : false;
+            let sdisc = item.properties.hasOwnProperty('_stack_discount_price_per_item') ? Number(item.properties._stack_discount_price_per_item) : 0;
             const cartSingleProduct = `
-        <div class="go-cart-item__single ${isHidden ? 'hide' : ''}" data-line="${dline}" ${dstack ? `data-stack="1"` : ''}>
+        <div class="go-cart-item__single ${isHidden ? 'hide' : ''}" data-stack-discount="${sdisc}" data-line="${dline}" ${dstack ? `data-stack="1"` : ''}>
             <div class="go-cart-item__info-wrapper">
                 <div class="go-cart-item__image" style="background-image: url(${item.image});"></div>
                 <div class="go-cart-item__info">
@@ -427,7 +432,19 @@ class GoCart {
             item.addEventListener('click', () => {
                 const line = item.parentNode.parentNode.getAttribute('data-line');
                 const quantity = Number(item.parentNode.querySelector(this.itemQuantity).value) + 1;
-                this.changeItemQuantity(line, quantity);
+                const line_item = cart.items[Number(line) - 1];
+
+                let ldiscount = 0;
+                if (line_item.properties.hasOwnProperty('_stack_discount_price_per_item')) {
+                  ldiscount = line_item.properties._stack_discount_price_per_item * quantity;
+                }
+
+                if (ldiscount) {
+                  let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
+                  this.changeItemQuantity(line, quantity, pp);
+                } else {
+                  this.changeItemQuantity(line, quantity);
+                }
             });
         });
         const itemQuantityMinus = document.querySelectorAll(this.itemQuantityMinus);
@@ -436,6 +453,12 @@ class GoCart {
                 const line = item.parentNode.parentNode.getAttribute('data-line');
                 const is_stack = item.parentNode.parentNode.getAttribute('data-stack');
                 const quantity = Number(item.parentNode.querySelector(this.itemQuantity).value) - 1;
+                const line_item = cart.items[Number(line) - 1];
+
+                let ldiscount = 0;
+                if (line_item.properties.hasOwnProperty('_stack_discount_price_per_item')) {
+                  ldiscount = line_item.properties._stack_discount_price_per_item * quantity;
+                }
 
                 if (quantity === 0 && is_stack && typeof this.stackBeforeDeleteCallback === 'function') {
                     let extra = null;
@@ -445,7 +468,13 @@ class GoCart {
                     return;
                 }
 
-                this.changeItemQuantity(line, quantity);
+                if (ldiscount) {
+                  let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
+                  this.changeItemQuantity(line, quantity, pp);
+                } else {
+                  this.changeItemQuantity(line, quantity);
+                }
+
                 if (Number((item.parentNode.querySelector(this.itemQuantity).value - 1)) === 0) {
                     GoCart.removeItemAnimation(item.parentNode.parentNode);
                 }
