@@ -16,6 +16,7 @@ class GoCart {
             cartDrawer: '.js-go-cart-drawer',
             cartDrawerContent: '.js-go-cart-drawer-content',
             cartDrawerSubTotal: '.js-go-cart-drawer-subtotal',
+            cartDrawerTotalDiscount: '.js-go-cart-drawer-total-discount',
             cartDrawerFooter: '.js-go-cart-drawer-footer',
             cartDrawerFooterMessage: '.js-go-cart-drawer-footer-message',
             cartDrawerClose: '.js-go-cart-drawer-close',
@@ -43,7 +44,8 @@ class GoCart {
             labelRemove: 'Remove',
             cartFormatterCallback: null,
             stackBeforeDeleteCallback: null,
-            stackBeforeQtyChangeCallback: null
+            stackBeforeQtyChangeCallback: null,
+            computeTotalDiscountCallback: null,
         };
 
         this.defaults = Object.assign({}, defaults, options);
@@ -56,6 +58,7 @@ class GoCart {
         this.cartDrawer = document.querySelector(this.defaults.cartDrawer);
         this.cartDrawerContent = document.querySelector(this.defaults.cartDrawerContent);
         this.cartDrawerSubTotal = document.querySelector(this.defaults.cartDrawerSubTotal);
+        this.cartDrawerTotalDiscount = document.querySelector(this.defaults.cartDrawerTotalDiscount);
         this.cartDrawerFooter = document.querySelector(this.defaults.cartDrawerFooter);
         this.cartDrawerFooterMessage = document.querySelector(this.defaults.cartDrawerFooterMessage);
         this.cartDrawerClose = document.querySelector(this.defaults.cartDrawerClose);
@@ -83,6 +86,7 @@ class GoCart {
         this.cartFormatterCallback = this.defaults.cartFormatterCallback;
         this.stackBeforeDeleteCallback = this.defaults.stackBeforeDeleteCallback;
         this.stackBeforeQtyChangeCallback = this.defaults.stackBeforeQtyChangeCallback;
+        this.computeTotalDiscountCallback = this.defaults.computeTotalDiscountCallback;
 
         this.init();
 
@@ -353,6 +357,14 @@ class GoCart {
         }
         this.cartItemCount(cart);
         this.cartDrawerSubTotal.innerHTML = formatMoney(cart.total_price, this.moneyFormat);
+
+        if (typeof this.computeTotalDiscountCallback === 'function') {
+            let tda = this.computeTotalDiscountCallback(cart);
+
+            this.cartDrawerSubTotal.innerHTML = formatMoney(tda.total_price, this.moneyFormat);
+            this.cartDrawerTotalDiscount.innerHTML = formatMoney(tda.original_total_price, this.moneyFormat);
+        }
+
         if (this.isDrawerMode) {
             if (cart.item_count === 0) {
                 this.renderBlankCartDrawer();
@@ -446,6 +458,14 @@ class GoCart {
             this.cartDrawerContent.innerHTML += cartSingleProduct;
         });
         this.cartDrawerSubTotal.innerHTML = formatMoney(cart.total_price, this.moneyFormat);
+
+        if (typeof this.computeTotalDiscountCallback === 'function') {
+            let tda = this.computeTotalDiscountCallback(cart);
+
+            this.cartDrawerSubTotal.innerHTML = formatMoney(tda.total_price, this.moneyFormat);
+            this.cartDrawerTotalDiscount.innerHTML = formatMoney(tda.original_total_price, this.moneyFormat);
+        }
+
         this.cartDrawerSubTotal.parentNode.classList.remove('is-invisible');
         const removeFromCart = document.querySelectorAll(this.removeFromCart);
         removeFromCart.forEach((item) => {
