@@ -358,7 +358,12 @@ class GoCart {
 
         if (typeof this.computeTotalDiscountCallback === 'function') {
             let tda = this.computeTotalDiscountCallback(cart);
-            this.cartDrawerSubTotal.innerHTML = `${formatMoney(tda.total_price, this.moneyFormat)}<span>${formatMoney(tda.original_total_price, this.moneyFormat)}</span>`;
+            if (tda.total_price !== tda.original_total_price) {
+                this.cartDrawerSubTotal.innerHTML = `
+                    ${formatMoney(tda.total_price, this.moneyFormat)}
+                    <span style="padding: 0 0 0 5px;font-size: 18px;text-decoration: line-through;">${formatMoney(tda.original_total_price, this.moneyFormat)}</span>
+                `;
+            }
         }
 
         if (this.isDrawerMode) {
@@ -457,7 +462,12 @@ class GoCart {
 
         if (typeof this.computeTotalDiscountCallback === 'function') {
             let tda = this.computeTotalDiscountCallback(cart);
-            this.cartDrawerSubTotal.innerHTML = `${formatMoney(tda.total_price, this.moneyFormat)}<span>${formatMoney(tda.original_total_price, this.moneyFormat)}</span>`;
+            if (tda.total_price !== tda.original_total_price) {
+                this.cartDrawerSubTotal.innerHTML = `
+                    ${formatMoney(tda.total_price, this.moneyFormat)}
+                    <span style="padding: 0 0 0 5px;font-size: 18px;text-decoration: line-through;">${formatMoney(tda.original_total_price, this.moneyFormat)}</span>
+                `;
+            }
         }
 
         this.cartDrawerSubTotal.parentNode.classList.remove('is-invisible');
