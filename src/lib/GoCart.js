@@ -1,5 +1,5 @@
 import './scss/go-cart.scss';
-import {formatMoney} from '@shopify/theme-currency/currency';
+import { formatMoney } from '@shopify/theme-currency/currency';
 import 'whatwg-fetch';
 import serialize from 'form-serialize';
 
@@ -210,7 +210,7 @@ class GoCart {
 
     addItemToCart(formID) {
         const form = document.querySelector(`#${formID}`);
-        const formData = serialize(form, {hash: true});
+        const formData = serialize(form, { hash: true });
         window.fetch('/cart/add.js', {
             method: 'POST',
             credentials: 'include',
@@ -235,33 +235,33 @@ class GoCart {
 
     changeItem(line, extra, cart, quantity) {
 
-      let citem = cart.items[line - 1];
-      let params = {};
-      if (extra) {
-          params = extra;
-      }
-      params[citem.key] = quantity;
+        let citem = cart.items[line - 1];
+        let params = {};
+        if (extra) {
+            params = extra;
+        }
+        params[citem.key] = quantity;
 
-      window.fetch('/cart/update.js', {
-          method: 'POST',
-          credentials: 'same-origin',
-          body: JSON.stringify({ updates: params }),
-          headers: {
-              'Content-Type': 'application/json',
-          },
-      })
-          .then((response) => response.json())
-          .then((response) => {
-              document.dispatchEvent(new CustomEvent("drawerRemoveProduct", {
-                  detail: { }
-              }));
-              return response;
-          })
-          .then(() => this.fetchCart())
-          .catch((error) => {
-              this.ajaxRequestFail();
-              throw new Error(error);
-          });
+        return window.fetch('/cart/update.js', {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: JSON.stringify({ updates: params }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => response.json())
+            .then((response) => {
+                document.dispatchEvent(new CustomEvent("drawerRemoveProduct", {
+                    detail: {}
+                }));
+                return response;
+            })
+            .then(() => this.fetchCart())
+            .catch((error) => {
+                this.ajaxRequestFail();
+                throw new Error(error);
+            });
     }
 
     removeItem(line, extra, cart) {
@@ -285,7 +285,7 @@ class GoCart {
             .then((response) => response.json())
             .then((response) => {
                 document.dispatchEvent(new CustomEvent("drawerRemoveProduct", {
-                    detail: { }
+                    detail: {}
                 }));
                 return response;
             })
@@ -297,11 +297,11 @@ class GoCart {
     }
 
     changeItemQuantity(line, quantity, properties) {
-        let params = {quantity: Number(quantity), line: Number(line)};
+        let params = { quantity: Number(quantity), line: Number(line) };
         if (properties) {
-          params.properties = properties;
+            params.properties = properties;
         }
-        window.fetch('/cart/change.js', {
+        return window.fetch('/cart/change.js', {
             method: 'POST',
             credentials: 'same-origin',
             body: JSON.stringify(params),
@@ -312,7 +312,7 @@ class GoCart {
             .then((response) => response.json())
             .then((response) => {
                 document.dispatchEvent(new CustomEvent("drawerRemoveProduct", {
-                    detail: { }
+                    detail: {}
                 }));
                 return response;
             })
@@ -494,21 +494,28 @@ class GoCart {
 
                 let ldiscount = 0;
                 if (line_item.properties.hasOwnProperty('_stack_discount_price_per_item')) {
-                  ldiscount = line_item.properties._stack_discount_price_per_item * quantity;
+                    ldiscount = line_item.properties._stack_discount_price_per_item * quantity;
                 }
 
                 if (is_stack && typeof this.stackBeforeQtyChangeCallback === 'function') {
-                  let extra = null;
-                  extra = this.stackBeforeQtyChangeCallback(cart, line, quantity);
-                  this.changeItem(line, extra, cart, quantity);
-                  return;
+                    let extra = null;
+                    extra = this.stackBeforeQtyChangeCallback(cart, line, quantity);
+                    this.changeItem(line, extra, cart, quantity).then(() => {
+                        if (ldiscount) {
+                            let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
+                            this.changeItemQuantity(line, quantity, pp);
+                        } else {
+                            this.changeItemQuantity(line, quantity);
+                        }
+                    });
+                    return;
                 }
 
                 if (ldiscount) {
-                  let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
-                  this.changeItemQuantity(line, quantity, pp);
+                    let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
+                    this.changeItemQuantity(line, quantity, pp);
                 } else {
-                  this.changeItemQuantity(line, quantity);
+                    this.changeItemQuantity(line, quantity);
                 }
             });
         });
@@ -522,7 +529,7 @@ class GoCart {
 
                 let ldiscount = 0;
                 if (line_item.properties.hasOwnProperty('_stack_discount_price_per_item')) {
-                  ldiscount = line_item.properties._stack_discount_price_per_item * quantity;
+                    ldiscount = line_item.properties._stack_discount_price_per_item * quantity;
                 }
 
                 if (quantity === 0 && is_stack && typeof this.stackBeforeDeleteCallback === 'function') {
@@ -534,17 +541,24 @@ class GoCart {
                 }
 
                 if (is_stack && typeof this.stackBeforeQtyChangeCallback === 'function') {
-                  let extra = null;
-                  extra = this.stackBeforeQtyChangeCallback(cart, line, quantity);
-                  this.changeItem(line, extra, cart, quantity);
-                  return;
+                    let extra = null;
+                    extra = this.stackBeforeQtyChangeCallback(cart, line, quantity);
+                    this.changeItem(line, extra, cart, quantity).then(() => {
+                        if (ldiscount) {
+                            let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
+                            this.changeItemQuantity(line, quantity, pp);
+                        } else {
+                            this.changeItemQuantity(line, quantity);
+                        }
+                    });
+                    return;
                 }
 
                 if (ldiscount) {
-                  let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
-                  this.changeItemQuantity(line, quantity, pp);
+                    let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
+                    this.changeItemQuantity(line, quantity, pp);
                 } else {
-                  this.changeItemQuantity(line, quantity);
+                    this.changeItemQuantity(line, quantity);
                 }
 
                 if (Number((item.parentNode.querySelector(this.itemQuantity).value - 1)) === 0) {
