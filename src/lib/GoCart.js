@@ -274,7 +274,7 @@ class GoCart {
         }
         params[citem.key] = quantity;
 
-        window.fetch('/cart/update.js', {
+        return window.fetch('/cart/update.js', {
             method: 'POST',
             credentials: 'same-origin',
             body: JSON.stringify({ updates: params }),
@@ -481,7 +481,11 @@ class GoCart {
                 if (is_stack && typeof this.stackBeforeDeleteCallback === 'function') {
                     extra = this.stackBeforeDeleteCallback(cart, line);
                 }
-                this.removeItem(line, extra, cart);
+                this.removeItem(line, extra, cart).then(() => {
+                    document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                        detail: {}
+                    }));
+                });
             });
         });
         const itemQuantityPlus = document.querySelectorAll(this.itemQuantityPlus);
@@ -504,11 +508,19 @@ class GoCart {
                     if (ldiscount) {
                         let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
                         this.changeItemQuantity(line, quantity, pp).then(() => {
-                            this.changeItem(line, extra, cart, quantity)
+                            this.changeItem(line, extra, cart, quantity).then(() => {
+                                document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                                    detail: {}
+                                }));
+                            });
                         });
                     } else {
                         this.changeItemQuantity(line, quantity).then(() => {
-                            this.changeItem(line, extra, cart, quantity)
+                            this.changeItem(line, extra, cart, quantity).then(() => {
+                                document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                                    detail: {}
+                                }));
+                            });
                         });
                     }
                     return;
@@ -516,9 +528,17 @@ class GoCart {
 
                 if (ldiscount) {
                     let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
-                    this.changeItemQuantity(line, quantity, pp);
+                    this.changeItemQuantity(line, quantity, pp).then(() => {
+                        document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                            detail: {}
+                        }));
+                    });
                 } else {
-                    this.changeItemQuantity(line, quantity);
+                    this.changeItemQuantity(line, quantity).then(() => {
+                        document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                            detail: {}
+                        }));
+                    });
                 }
             });
         });
@@ -539,7 +559,11 @@ class GoCart {
                     let extra = null;
                     GoCart.removeItemAnimation(item.parentNode.parentNode);
                     extra = this.stackBeforeDeleteCallback(cart, line);
-                    this.removeItem(line, extra, cart);
+                    this.removeItem(line, extra, cart).then(() => {
+                        document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                            detail: {}
+                        }));
+                    });
                     return;
                 }
 
@@ -550,11 +574,19 @@ class GoCart {
                     if (ldiscount) {
                         let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
                         this.changeItemQuantity(line, quantity, pp).then(() => {
-                            this.changeItem(line, extra, cart, quantity)
+                            this.changeItem(line, extra, cart, quantity).then(() => {
+                                document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                                    detail: {}
+                                }));
+                            });
                         });
                     } else {
                         this.changeItemQuantity(line, quantity).then(() => {
-                            this.changeItem(line, extra, cart, quantity)
+                            this.changeItem(line, extra, cart, quantity).then(() => {
+                                document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                                    detail: {}
+                                }));
+                            });
                         });
                     }
                     return;
@@ -562,9 +594,17 @@ class GoCart {
 
                 if (ldiscount) {
                     let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
-                    this.changeItemQuantity(line, quantity, pp);
+                    this.changeItemQuantity(line, quantity, pp).then(() => {
+                        document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                            detail: {}
+                        }));
+                    });
                 } else {
-                    this.changeItemQuantity(line, quantity);
+                    this.changeItemQuantity(line, quantity).then(() => {
+                        document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                            detail: {}
+                        }));
+                    });
                 }
 
                 if (Number((item.parentNode.querySelector(this.itemQuantity).value - 1)) === 0) {
@@ -612,7 +652,11 @@ class GoCart {
             item.addEventListener('click', () => {
                 GoCart.removeItemAnimation(item.parentNode);
                 const line = item.parentNode.getAttribute('data-line');
-                this.removeItem(line, null, cart);
+                this.removeItem(line, null, cart).then(() => {
+                    document.dispatchEvent(new CustomEvent("drawerUpdateQuantity", {
+                        detail: {}
+                    }));
+                });
             });
         });
         const itemQuantityPlus = document.querySelectorAll(this.itemQuantityPlus);
