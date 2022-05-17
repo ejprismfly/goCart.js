@@ -42,7 +42,8 @@ class GoCart {
             labelQuantity: 'Quantity:',
             labelRemove: 'Remove',
             cartFormatterCallback: null,
-            stackBeforeDeleteCallback: null
+            stackBeforeDeleteCallback: null,
+            stackBeforeQtyChangeCallback: null
         };
 
         this.defaults = Object.assign({}, defaults, options);
@@ -81,6 +82,7 @@ class GoCart {
         this.labelRemove = this.defaults.labelRemove;
         this.cartFormatterCallback = this.defaults.cartFormatterCallback;
         this.stackBeforeDeleteCallback = this.defaults.stackBeforeDeleteCallback;
+        this.stackBeforeQtyChangeCallback = this.defaults.stackBeforeQtyChangeCallback;
 
         this.init();
 
@@ -227,6 +229,37 @@ class GoCart {
                 this.ajaxRequestFail();
                 throw new Error(error);
             });
+    }
+
+    changeItem(line, extra, cart, quantity) {
+
+      let citem = cart.items[line - 1];
+      let params = {};
+      if (extra) {
+          params = extra;
+      }
+      params[citem.key] = quantity;
+
+      window.fetch('/cart/update.js', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: JSON.stringify({ updates: params }),
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      })
+          .then((response) => response.json())
+          .then((response) => {
+              document.dispatchEvent(new CustomEvent("drawerRemoveProduct", {
+                  detail: { }
+              }));
+              return response;
+          })
+          .then(() => this.fetchCart())
+          .catch((error) => {
+              this.ajaxRequestFail();
+              throw new Error(error);
+          });
     }
 
     removeItem(line, extra, cart) {
@@ -431,12 +464,20 @@ class GoCart {
         itemQuantityPlus.forEach((item) => {
             item.addEventListener('click', () => {
                 const line = item.parentNode.parentNode.getAttribute('data-line');
+                const is_stack = item.parentNode.parentNode.getAttribute('data-stack');
                 const quantity = Number(item.parentNode.querySelector(this.itemQuantity).value) + 1;
                 const line_item = cart.items[Number(line) - 1];
 
                 let ldiscount = 0;
                 if (line_item.properties.hasOwnProperty('_stack_discount_price_per_item')) {
                   ldiscount = line_item.properties._stack_discount_price_per_item * quantity;
+                }
+
+                if (is_stack && typeof this.stackBeforeQtyChangeCallback === 'function') {
+                  let extra = null;
+                  extra = this.stackBeforeQtyChangeCallback(cart, line, quantity);
+                  this.changeItem(line, extra, cart, quantity);
+                  return;
                 }
 
                 if (ldiscount) {
@@ -466,6 +507,13 @@ class GoCart {
                     extra = this.stackBeforeDeleteCallback(cart, line);
                     this.removeItem(line, extra, cart);
                     return;
+                }
+
+                if (is_stack && typeof this.stackBeforeQtyChangeCallback === 'function') {
+                  let extra = null;
+                  extra = this.stackBeforeQtyChangeCallback(cart, line, quantity);
+                  this.changeItem(line, extra, cart, quantity);
+                  return;
                 }
 
                 if (ldiscount) {
