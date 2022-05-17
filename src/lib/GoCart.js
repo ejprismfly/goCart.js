@@ -500,14 +500,17 @@ class GoCart {
                 if (is_stack && typeof this.stackBeforeQtyChangeCallback === 'function') {
                     let extra = null;
                     extra = this.stackBeforeQtyChangeCallback(cart, line, quantity);
-                    this.changeItem(line, extra, cart, quantity).then(() => {
-                        if (ldiscount) {
-                            let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
-                            this.changeItemQuantity(line, quantity, pp);
-                        } else {
-                            this.changeItemQuantity(line, quantity);
-                        }
-                    });
+                    
+                    if (ldiscount) {
+                        let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
+                        this.changeItemQuantity(line, quantity, pp).then(() => {
+                            this.changeItem(line, extra, cart, quantity)
+                        });
+                    } else {
+                        this.changeItemQuantity(line, quantity).then(() => {
+                            this.changeItem(line, extra, cart, quantity)
+                        });
+                    }
                     return;
                 }
 
@@ -543,14 +546,17 @@ class GoCart {
                 if (is_stack && typeof this.stackBeforeQtyChangeCallback === 'function') {
                     let extra = null;
                     extra = this.stackBeforeQtyChangeCallback(cart, line, quantity);
-                    this.changeItem(line, extra, cart, quantity).then(() => {
-                        if (ldiscount) {
-                            let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
-                            this.changeItemQuantity(line, quantity, pp);
-                        } else {
-                            this.changeItemQuantity(line, quantity);
-                        }
-                    });
+
+                    if (ldiscount) {
+                        let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
+                        this.changeItemQuantity(line, quantity, pp).then(() => {
+                            this.changeItem(line, extra, cart, quantity)
+                        });
+                    } else {
+                        this.changeItemQuantity(line, quantity).then(() => {
+                            this.changeItem(line, extra, cart, quantity)
+                        });
+                    }
                     return;
                 }
 
