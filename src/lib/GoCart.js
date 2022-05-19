@@ -358,12 +358,15 @@ class GoCart {
 
         if (typeof this.computeTotalDiscountCallback === 'function') {
             let tda = this.computeTotalDiscountCallback(cart);
-            if (tda.total_price !== tda.original_total_price) {
-                this.cartDrawerSubTotal.innerHTML = `
+            if (tda) {
+                if (tda.total_price !== tda.original_total_price) {
+                    this.cartDrawerSubTotal.innerHTML = `
                     ${formatMoney(tda.total_price, this.moneyFormat)}
                     <span style="padding: 0 0 0 5px;font-size: 18px;text-decoration: line-through;">${formatMoney(tda.original_total_price, this.moneyFormat)}</span>
                 `;
+                }
             }
+
         }
 
         if (this.isDrawerMode) {
@@ -462,11 +465,13 @@ class GoCart {
 
         if (typeof this.computeTotalDiscountCallback === 'function') {
             let tda = this.computeTotalDiscountCallback(cart);
-            if (tda.total_price !== tda.original_total_price) {
-                this.cartDrawerSubTotal.innerHTML = `
+            if (tda) {
+                if (tda.total_price !== tda.original_total_price) {
+                    this.cartDrawerSubTotal.innerHTML = `
                     ${formatMoney(tda.total_price, this.moneyFormat)}
                     <span style="padding: 0 0 0 5px;font-size: 18px;text-decoration: line-through;">${formatMoney(tda.original_total_price, this.moneyFormat)}</span>
                 `;
+                }
             }
         }
 
@@ -504,7 +509,7 @@ class GoCart {
                 if (is_stack && typeof this.stackBeforeQtyChangeCallback === 'function') {
                     let extra = null;
                     extra = this.stackBeforeQtyChangeCallback(cart, line, quantity);
-                    
+
                     if (ldiscount) {
                         let pp = Object.assign(line_item.properties, { _stack_discount_price: ldiscount });
                         this.changeItemQuantity(line, quantity, pp).then(() => {
